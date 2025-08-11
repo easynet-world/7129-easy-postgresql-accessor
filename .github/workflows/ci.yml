@@ -81,18 +81,43 @@ jobs:
         echo "New version: $NEW_VERSION"
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
     
+    - name: Check if version exists on npm
+      id: check-version
+      run: |
+        NEW_VERSION=${{ steps.get-version.outputs.version }}
+        echo "Checking if version $NEW_VERSION exists on npm..."
+        
+        if npm view postgresql-data-accessor@$NEW_VERSION > /dev/null 2>&1; then
+          echo "Version $NEW_VERSION already exists on npm"
+          echo "should_publish=false" >> $GITHUB_OUTPUT
+        else
+          echo "Version $NEW_VERSION does not exist on npm"
+          echo "should_publish=true" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Publish to NPM
+      if: steps.check-version.outputs.should_publish == 'true'
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
+    - name: Skip publishing
+      if: steps.check-version.outputs.should_publish == 'false'
+      run: echo "Skipping publish - version ${{ steps.get-version.outputs.version }} already exists on npm"
+    
     - name: Create Git tag
+      if: steps.check-version.outputs.should_publish == 'true'
       run: |
         git tag v${{ steps.get-version.outputs.version }}
         git push origin v${{ steps.get-version.outputs.version }}
     
     - name: Push version bump
+      if: steps.check-version.outputs.should_publish == 'true'
       run: |
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ steps.get-version.outputs.version }}"
         git push origin master
+    
+    - name: Skip Git operations
+      if: steps.check-version.outputs.should_publish == 'false'
+      run: echo "Skipping Git operations - version already exists"
