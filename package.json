@@ -36,7 +36,7 @@
     "nodejs",
     "database-layer"
   ],
-  "author": "Your Name",
+  "author": "boqiang.liang <lbq999@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "pg": "^8.11.3",
@@ -56,10 +56,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/postgresql-data-accessor.git"
+    "url": "git+https://github.com/easynet-world/7129-postgresql-data-accessor.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/postgresql-data-accessor/issues"
+    "url": "https://github.com/easynet-world/7129-postgresql-data-accessor/issues"
   },
-  "homepage": "https://github.com/yourusername/postgresql-data-accessor#readme"
+  "homepage": "https://github.com/easynet-world/7129-postgresql-data-accessor#readme"
 }
