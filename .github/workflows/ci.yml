@@ -71,13 +71,35 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
     
-    - name: Bump patch version
-      run: npm version patch --no-git-tag-version
+    - name: Get latest version from npm
+      id: get-latest
+      run: |
+        LATEST_VERSION=$(npm view postgresql-data-accessor version)
+        echo "Latest version on npm: $LATEST_VERSION"
+        echo "latest=$LATEST_VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Bump patch version from latest
+      run: |
+        LATEST_VERSION=${{ steps.get-latest.outputs.latest }}
+        echo "Bumping from latest version: $LATEST_VERSION"
+        
+        # Extract major.minor.patch components
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        
+        echo "New version will be: $NEW_VERSION"
+        
+        # Update package.json version
+        npm version $NEW_VERSION --no-git-tag-version
+        
+        # Store the new version for later use
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
     
     - name: Get new version
       id: get-version
       run: |
-        NEW_VERSION=$(node -p "require('./package.json').version")
+        NEW_VERSION=${{ env.NEW_VERSION }}
         echo "New version: $NEW_VERSION"
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
     
