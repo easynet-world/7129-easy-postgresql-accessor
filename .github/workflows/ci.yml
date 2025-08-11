@@ -49,6 +49,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -63,7 +66,27 @@ jobs:
     - name: Build package
       run: npm run build
     
+    - name: Check if version exists on npm
+      id: check-version
+      run: |
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Check if version exists on npm
+        if npm view postgresql-data-accessor@$CURRENT_VERSION > /dev/null 2>&1; then
+          echo "Version $CURRENT_VERSION already exists on npm"
+          echo "should_publish=false" >> $GITHUB_OUTPUT
+        else
+          echo "Version $CURRENT_VERSION does not exist on npm"
+          echo "should_publish=true" >> $GITHUB_OUTPUT
+        fi
+    
     - name: Publish to NPM
+      if: steps.check-version.outputs.should_publish == 'true'
       run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    
+    - name: Skip publishing
+      if: steps.check-version.outputs.should_publish == 'false'
+      run: echo "Skipping publish - version already exists on npm"
