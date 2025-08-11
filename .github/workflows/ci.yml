@@ -116,9 +116,11 @@ jobs:
         
         # Use npm view with explicit error handling
         if npm view postgresql-data-accessor@$NEW_VERSION > /dev/null 2>&1; then
-          echo "Version $NEW_VERSION already exists on npm"
+          echo "::error::Version $NEW_VERSION already exists on npm! This should not happen."
+          echo "::error::The version bumping logic may have an issue."
           echo "should_publish=false" >> $GITHUB_OUTPUT
           echo "::warning::Version $NEW_VERSION already exists on npm, skipping publish"
+          exit 1  # Fail the workflow if this happens
         else
           echo "Version $NEW_VERSION does not exist on npm"
           echo "should_publish=true" >> $GITHUB_OUTPUT
@@ -127,13 +129,17 @@ jobs:
     
     - name: Publish to NPM
       if: steps.check-version.outputs.should_publish == 'true'
-      run: npm publish
+      run: |
+        echo "Publishing version ${{ steps.get-version.outputs.version }} to npm..."
+        npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
     - name: Skip publishing
       if: steps.check-version.outputs.should_publish == 'false'
-      run: echo "Skipping publish - version ${{ steps.get-version.outputs.version }} already exists on npm"
+      run: |
+        echo "::warning::Skipping publish - version ${{ steps.get-version.outputs.version }} already exists on npm"
+        echo "This version was already published, no need to publish again."
     
     - name: Create Git tag
       if: steps.check-version.outputs.should_publish == 'true'
