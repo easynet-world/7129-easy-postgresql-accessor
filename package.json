@@ -1,6 +1,6 @@
 {
   "name": "postgresql-data-accessor",
-  "version": "0.1.0",
+  "version": "0.2.4",
   "description": "A powerful PostgreSQL data access layer with automatic schema discovery, CRUD operations, and SQL injection protection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
