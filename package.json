@@ -13,8 +13,8 @@
     "test:unit": "jest --testPathIgnorePatterns=integration",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
-    "prepare": "/opt/homebrew/bin/npm run build",
-    "prepublishOnly": "/opt/homebrew/bin/npm test && /opt/homebrew/bin/npm run lint",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
     "start": "node dist/index.js",
     "dev": "nodemon src/index.js",
     "setup-test-db": "chmod +x scripts/setup-test-db.sh && ./scripts/setup-test-db.sh",
@@ -22,7 +22,7 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
-    "publish": "/opt/homebrew/bin/npm publish"
+    "publish": "npm publish"
   },
   "keywords": [
     "postgresql",
