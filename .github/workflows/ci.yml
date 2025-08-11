@@ -89,9 +89,14 @@ jobs:
         NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
         
         echo "New version will be: $NEW_VERSION"
+        echo "::notice::Bumping from $LATEST_VERSION to $NEW_VERSION"
         
         # Update package.json version
         npm version $NEW_VERSION --no-git-tag-version
+        
+        # Verify the version was updated
+        ACTUAL_VERSION=$(node -p "require('./package.json').version")
+        echo "Package.json now shows version: $ACTUAL_VERSION"
         
         # Store the new version for later use
         echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
@@ -109,12 +114,15 @@ jobs:
         NEW_VERSION=${{ steps.get-version.outputs.version }}
         echo "Checking if version $NEW_VERSION exists on npm..."
         
+        # Use npm view with explicit error handling
         if npm view postgresql-data-accessor@$NEW_VERSION > /dev/null 2>&1; then
           echo "Version $NEW_VERSION already exists on npm"
           echo "should_publish=false" >> $GITHUB_OUTPUT
+          echo "::warning::Version $NEW_VERSION already exists on npm, skipping publish"
         else
           echo "Version $NEW_VERSION does not exist on npm"
           echo "should_publish=true" >> $GITHUB_OUTPUT
+          echo "::notice::Version $NEW_VERSION is new, will publish"
         fi
     
     - name: Publish to NPM
