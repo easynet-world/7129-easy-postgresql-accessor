@@ -601,8 +601,8 @@ We welcome contributions! Please see our contributing guidelines:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/postgresql-data-accessor.git
-cd postgresql-data-accessor
+git clone https://github.com/easynet-world/7129-postgresql-data-accessor.git
+cd 7129-postgresql-data-accessor
 
 # Install dependencies
 npm install
@@ -629,9 +629,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/postgresql-data-accessor/issues)
-- **Documentation**: [GitHub Wiki](https://github.com/yourusername/postgresql-data-accessor/wiki)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/postgresql-data-accessor/discussions)
+- **Issues**: [GitHub Issues](https://github.com/easynet-world/7129-postgresql-data-accessor/issues)
+- **Documentation**: [GitHub Wiki](https://github.com/easynet-world/7129-postgresql-data-accessor/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/easynet-world/7129-postgresql-data-accessor/discussions)
 
 ---
 
