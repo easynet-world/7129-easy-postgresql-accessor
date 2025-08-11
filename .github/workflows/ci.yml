@@ -131,7 +131,13 @@ jobs:
       if: steps.check-version.outputs.should_publish == 'true'
       run: |
         echo "Publishing version ${{ steps.get-version.outputs.version }} to npm..."
-        npm publish
+        # Run tests and lint before publishing to ensure quality
+        npm test
+        npm run lint
+        # Build the package
+        npm run build
+        # Publish without running prepublishOnly again
+        npm publish --ignore-scripts
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
