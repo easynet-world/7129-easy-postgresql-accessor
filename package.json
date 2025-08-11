@@ -1,0 +1,65 @@
+{
+  "name": "postgresql-data-accessor",
+  "version": "0.0.1",
+  "description": "A powerful PostgreSQL data access layer with automatic schema discovery, CRUD operations, and SQL injection protection",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "babel src -d dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:integration": "jest --testPathPattern=integration",
+    "test:unit": "jest --testPathIgnorePatterns=integration",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "prepare": "/opt/homebrew/bin/npm run build",
+    "prepublishOnly": "/opt/homebrew/bin/npm test && /opt/homebrew/bin/npm run lint",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.js",
+    "setup-test-db": "chmod +x scripts/setup-test-db.sh && ./scripts/setup-test-db.sh",
+    "cleanup-test-db": "chmod +x scripts/cleanup-test-db.sh && ./scripts/cleanup-test-db.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "publish": "/opt/homebrew/bin/npm publish"
+  },
+  "keywords": [
+    "postgresql",
+    "postgres",
+    "database",
+    "data-access",
+    "orm",
+    "crud",
+    "schema-discovery",
+    "sql-injection-protection",
+    "nodejs",
+    "database-layer"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.5",
+    "@babel/preset-env": "^7.23.5",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/postgresql-data-accessor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/postgresql-data-accessor/issues"
+  },
+  "homepage": "https://github.com/yourusername/postgresql-data-accessor#readme"
+}
