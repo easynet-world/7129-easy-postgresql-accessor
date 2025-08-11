@@ -71,8 +71,8 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
     
-    - name: Bump minor version
-      run: npm version minor --no-git-tag-version
+    - name: Bump patch version
+      run: npm version patch --no-git-tag-version
     
     - name: Get new version
       id: get-version
