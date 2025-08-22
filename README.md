@@ -20,35 +20,60 @@ A powerful, production-ready PostgreSQL data access layer for Node.js applicatio
 ## 🚀 Installation
 
 ```bash
-npm install postgresql-data-accessor
+npm install postgresql-data-accessor dotenv
 ```
+
+**Note**: The `dotenv` package is required for environment variable support. If you prefer not to use it, you can manually pass configuration options to the BaseAccessor constructor.
 
 ## 📖 Quick Start
 
-### Basic Setup
+### 1. Environment Setup
 
-```javascript
-const BaseAccessor = require('postgresql-data-accessor');
+Create a `.env` file in your project root:
 
-// Initialize with default configuration
-const accessor = new BaseAccessor();
+```env
+# Database Connection
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_SCHEMA=public
 
-// Or with custom configuration
-const accessor = new BaseAccessor({
-  host: 'localhost',
-  port: 5432,
-  database: 'myapp',
-  user: 'postgres',
-  password: 'password'
-});
+# Connection Pool Settings
+DB_MAX_CONNECTIONS=20
+DB_IDLE_TIMEOUT=30000
+DB_CONNECTION_TIMEOUT=2000
 ```
 
-### Your First Database Operation
+### 2. Basic Setup
 
 ```javascript
-// Add a table to the accessor (discovers schema automatically)
-await accessor.addTable('users');
+require('dotenv').config();
+const BaseAccessor = require('postgresql-data-accessor');
 
+// Initialize with environment variables
+const accessor = new BaseAccessor();
+```
+
+### 3. Auto Schema Discovery
+
+```javascript
+// 🔍 Automatically discover table structure, constraints, and relationships
+await accessor.addTable('users');
+await accessor.addTable('orders');
+
+// The accessor now knows:
+// - All column names and types
+// - Primary keys and unique constraints
+// - Foreign key relationships
+// - Default values and constraints
+```
+
+### 4. Complete CRUD Operations
+
+#### Create (Insert)
+```javascript
 // Create a new user
 const newUser = {
   email: 'john.doe@example.com',
@@ -58,9 +83,87 @@ const newUser = {
   isActive: true
 };
 
-// Insert the user (automatically handles ID generation)
 const result = await accessor.create('users', newUser);
 console.log('Created user with ID:', result.id);
+```
+
+#### Read (Select)
+```javascript
+// Read all users
+const allUsers = await accessor.read('users');
+
+// Read with conditions
+const activeUsers = await accessor.read('users', { isActive: true });
+
+// Read with pagination
+const paginatedUsers = await accessor.read('users', {}, {
+  limit: 10,
+  offset: 0,
+  orderBy: { createdAt: 'DESC' }
+});
+```
+
+#### Update
+```javascript
+// Update user by ID
+const affectedRows = await accessor.update('users', 
+  { isActive: false, lastLoginAt: new Date() }, 
+  { id: 1 }
+);
+
+// Update by email
+const affectedRows = await accessor.update('users',
+  { lastLoginAt: new Date() },
+  { email: 'john.doe@example.com' }
+);
+```
+
+#### Delete
+```javascript
+// Delete by ID
+const deletedRows = await accessor.delete('users', { id: 1 });
+
+// Delete by condition
+const deletedRows = await accessor.delete('users', { isActive: false });
+```
+
+### 5. 🚀 Smart Upsert Operations
+
+```javascript
+// 🔄 Upsert automatically handles insert or update based on unique constraints
+const user = await accessor.upsert('users', {
+  email: 'john.doe@example.com',        // Unique constraint
+  firstName: 'John',
+  lastName: 'Doe',
+  lastLoginAt: new Date(),
+  loginCount: 1
+}, { email: 'john.doe@example.com' });
+
+// This will:
+// ✅ INSERT if email doesn't exist
+// ✅ UPDATE if email exists (incrementing loginCount, updating lastLoginAt)
+// ✅ Automatically detect unique constraints from schema
+// ✅ Handle conflicts gracefully
+```
+
+### 6. Advanced Operations
+
+```javascript
+// Batch operations
+const operations = [
+  { type: 'create', table: 'users', data: { email: 'user1@example.com', name: 'User 1' } },
+  { type: 'create', table: 'users', data: { email: 'user2@example.com', name: 'User 2' } },
+  { type: 'upsert', table: 'users', data: { email: 'user3@example.com', name: 'User 3' }, conditions: { email: 'user3@example.com' } }
+];
+
+const results = await accessor.batch(operations);
+
+// Transactions
+const result = await accessor.transaction(async (tx) => {
+  const user = await tx.create('users', { email: 'john@example.com', name: 'John' });
+  const order = await tx.create('orders', { userId: user.id, total: 99.99 });
+  return { user, order };
+});
 ```
 
 ## 🔧 Configuration
