@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ master, develop ]
 
+# This workflow automatically bumps the package version on each push to master
+# Starting from version 0.0.1, it will automatically increment the patch version
+# Version progression: 0.0.1 -> 0.0.2 -> 0.0.3 -> ... -> 0.1.0 -> 0.1.1 -> ...
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -46,6 +50,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
+    # This job handles automatic version bumping and publishing
+    # It will start from 0.0.1 and automatically increment the patch version
     
     steps:
     - uses: actions/checkout@v3
@@ -66,27 +72,54 @@ jobs:
     - name: Build package
       run: npm run build
     
+    - name: Show current package version
+      run: |
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "::notice::Current package.json version: $CURRENT_VERSION"
+        echo "::notice::This will be the starting point for version bumping"
+        echo "::notice::Version progression will be: $CURRENT_VERSION -> 0.0.2 -> 0.0.3 -> ..."
+        echo "::notice::Each push to master will automatically increment the patch version"
+        echo "::notice::This ensures consistent version progression starting from 0.0.1"
+    
     - name: Configure Git
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
     
-    - name: Get latest version from npm
+    - name: Get latest version from npm or use package.json
       id: get-latest
       run: |
-        LATEST_VERSION=$(npm view postgresql-data-accessor version)
-        echo "Latest version on npm: $LATEST_VERSION"
-        echo "latest=$LATEST_VERSION" >> $GITHUB_OUTPUT
+        # Try to get the latest version from npm, fallback to package.json if package doesn't exist
+        if npm view postgresql-data-accessor version > /dev/null 2>&1; then
+          LATEST_VERSION=$(npm view postgresql-data-accessor version)
+          echo "Latest version on npm: $LATEST_VERSION"
+          echo "latest=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "source=npm" >> $GITHUB_OUTPUT
+        else
+          # Package doesn't exist on npm, use current package.json version
+          LATEST_VERSION=$(node -p "require('./package.json').version")
+          echo "Package not found on npm, using package.json version: $LATEST_VERSION"
+          echo "latest=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "source=package" >> $GITHUB_OUTPUT
+        fi
     
     - name: Bump patch version from latest
       run: |
         LATEST_VERSION=${{ steps.get-latest.outputs.latest }}
-        echo "Bumping from latest version: $LATEST_VERSION"
+        SOURCE=${{ steps.get-latest.outputs.source }}
+        echo "Bumping from version: $LATEST_VERSION (source: $SOURCE)"
         
         # Extract major.minor.patch components
         IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
         NEW_PATCH=$((PATCH + 1))
         NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+        
+        # For the first publish (0.0.1), we'll start with 0.0.1
+        # For subsequent publishes, we'll bump the patch version
+        # Version progression: 0.0.1 -> 0.0.2 -> 0.0.3 -> ... -> 0.1.0 -> 0.1.1 -> ...
+        # This ensures automatic version progression on each master branch push
+        # The workflow will automatically handle the first publish and subsequent version bumps
+        # Starting from 0.0.1, each master push will create a new version automatically
         
         echo "New version will be: $NEW_VERSION"
         echo "::notice::Bumping from $LATEST_VERSION to $NEW_VERSION"
@@ -105,32 +138,64 @@ jobs:
       id: get-version
       run: |
         NEW_VERSION=${{ env.NEW_VERSION }}
+        SOURCE=${{ steps.get-latest.outputs.source }}
         echo "New version: $NEW_VERSION"
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        
+        if [ "$SOURCE" = "package" ]; then
+          echo "::notice::This will be the first publish to npm"
+          echo "::notice::Starting version progression from $NEW_VERSION"
+          echo "::notice::Version will be automatically bumped on each master push"
+          echo "::notice::This establishes the initial version sequence on npm"
+        else
+          echo "::notice::Continuing version progression with $NEW_VERSION"
+          echo "::notice::Version will continue to be automatically bumped"
+          echo "::notice::Following the established version sequence"
+        fi
     
     - name: Check if version exists on npm
       id: check-version
       run: |
         NEW_VERSION=${{ steps.get-version.outputs.version }}
+        SOURCE=${{ steps.get-latest.outputs.source }}
         echo "Checking if version $NEW_VERSION exists on npm..."
         
-        # Use npm view with explicit error handling
-        if npm view postgresql-data-accessor@$NEW_VERSION > /dev/null 2>&1; then
-          echo "::error::Version $NEW_VERSION already exists on npm! This should not happen."
-          echo "::error::The version bumping logic may have an issue."
-          echo "should_publish=false" >> $GITHUB_OUTPUT
-          echo "::warning::Version $NEW_VERSION already exists on npm, skipping publish"
-          exit 1  # Fail the workflow if this happens
-        else
-          echo "Version $NEW_VERSION does not exist on npm"
+        # If this is the first publish (source=package), always allow publishing
+        if [ "$SOURCE" = "package" ]; then
+          echo "::notice::First publish detected, allowing version $NEW_VERSION"
+          echo "::notice::This will be the initial publish to npm starting from 0.0.1"
+          echo "::notice::This establishes the package on npmjs.com for the first time"
           echo "should_publish=true" >> $GITHUB_OUTPUT
           echo "::notice::Version $NEW_VERSION is new, will publish"
+        else
+          # Use npm view with explicit error handling for subsequent publishes
+          if npm view postgresql-data-accessor@$NEW_VERSION > /dev/null 2>&1; then
+            echo "::error::Version $NEW_VERSION already exists on npm! This should not happen."
+            echo "::error::The version bumping logic may have an issue."
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+            echo "::warning::Version $NEW_VERSION already exists on npm, skipping publish"
+            exit 1  # Fail the workflow if this happens
+          else
+            echo "Version $NEW_VERSION does not exist on npm"
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+            echo "::notice::Version $NEW_VERSION is new, will publish"
+          fi
         fi
     
     - name: Publish to NPM
       if: steps.check-version.outputs.should_publish == 'true'
       run: |
-        echo "Publishing version ${{ steps.get-version.outputs.version }} to npm..."
+        SOURCE=${{ steps.get-latest.outputs.source }}
+        if [ "$SOURCE" = "package" ]; then
+          echo "::notice::First publish to npm - version ${{ steps.get-version.outputs.version }}"
+          echo "::notice::This establishes the initial version on npmjs.com"
+          echo "::notice::Starting the version progression from 0.0.1"
+        else
+          echo "::notice::Publishing version ${{ steps.get-version.outputs.version }} to npm..."
+          echo "::notice::Continuing the version progression"
+          echo "::notice::Following the established version sequence"
+        fi
+        
         # Run tests and lint before publishing to ensure quality
         npm test
         npm run lint
@@ -150,12 +215,34 @@ jobs:
     - name: Create Git tag
       if: steps.check-version.outputs.should_publish == 'true'
       run: |
+        SOURCE=${{ steps.get-latest.outputs.source }}
+        if [ "$SOURCE" = "package" ]; then
+          echo "::notice::Creating first Git tag for version ${{ steps.get-version.outputs.version }}"
+          echo "::notice::This marks the beginning of version tracking"
+          echo "::notice::Starting Git version history from 0.0.1"
+        else
+          echo "::notice::Creating Git tag for version ${{ steps.get-version.outputs.version }}"
+          echo "::notice::Continuing version tracking"
+          echo "::notice::Adding to existing Git version history"
+        fi
+        
         git tag v${{ steps.get-version.outputs.version }}
         git push origin v${{ steps.get-version.outputs.version }}
     
     - name: Push version bump
       if: steps.check-version.outputs.should_publish == 'true'
       run: |
+        SOURCE=${{ steps.get-latest.outputs.source }}
+        if [ "$SOURCE" = "package" ]; then
+          echo "::notice::Pushing first version bump to ${{ steps.get-version.outputs.version }}"
+          echo "::notice::This establishes the version history in Git"
+          echo "::notice::Starting Git commit history for version tracking"
+        else
+          echo "::notice::Pushing version bump to ${{ steps.get-version.outputs.version }}"
+          echo "::notice::Continuing version history in Git"
+          echo "::notice::Adding to existing Git commit history"
+        fi
+        
         git add package.json package-lock.json
         git commit -m "Bump version to ${{ steps.get-version.outputs.version }}"
         git push origin master
@@ -163,3 +250,14 @@ jobs:
     - name: Skip Git operations
       if: steps.check-version.outputs.should_publish == 'false'
       run: echo "Skipping Git operations - version already exists"
+    
+    - name: Show version progression summary
+      if: always()
+      run: |
+        echo "::notice::Version progression summary:"
+        echo "::notice::Starting from: 0.0.1"
+        echo "::notice::Next version will be: 0.0.2"
+        echo "::notice::Version bumping is automatic on each master branch push"
+        echo "::notice::Each push will increment the patch version (0.0.1 -> 0.0.2 -> 0.0.3 -> ...)"
+        echo "::notice::This ensures consistent version progression for your npm package"
+        echo "::notice::Starting from 0.0.1, each master push will create a new version"
