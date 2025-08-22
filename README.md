@@ -36,9 +36,9 @@ DB_PASSWORD=your_password
 
 ```javascript
 require('dotenv').config();
-const BaseAccessor = require('postgresql-data-accessor');
+const PostgreSQLAccessor = require('postgresql-data-accessor');
 
-const accessor = new BaseAccessor();
+const accessor = new PostgreSQLAccessor();
 
 // 🔍 Automatically scan table structure
 await accessor.addTable('users');

@@ -1,9 +1,9 @@
-const BaseAccessor = require('../../src/data/BaseAccessor');
+const PostgreSQLAccessor = require('../../src/data/PostgreSQLAccessor');
 
 // These tests require a test database to be running
 // They are marked as integration tests and can be run separately
 
-describe('BaseAccessor Integration Tests', () => {
+describe('PostgreSQLAccessor Integration Tests', () => {
     let baseAccessor;
 
     beforeAll(async () => {
@@ -15,7 +15,7 @@ describe('BaseAccessor Integration Tests', () => {
         process.env.DB_NAME = process.env.TEST_DB_NAME || 'testdb';
         process.env.DB_SCHEMA = process.env.TEST_DB_SCHEMA || 'public';
 
-        baseAccessor = new BaseAccessor();
+        baseAccessor = new PostgreSQLAccessor();
         await baseAccessor.initialize();
     });
 

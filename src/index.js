@@ -1,9 +1,9 @@
-const BaseAccessor = require('./data/BaseAccessor');
+const PostgreSQLAccessor = require('./data/PostgreSQLAccessor');
 const PGClientFactory = require('./utils/PGClientFactory');
 const ObjectUtility = require('./utils/ObjectUtility');
 
 module.exports = {
-    BaseAccessor,
+    PostgreSQLAccessor,
     PGClientFactory,
     ObjectUtility
 };

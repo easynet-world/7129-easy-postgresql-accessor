@@ -2,7 +2,7 @@ const {Client} = require('pg'); // eslint-disable-line no-unused-vars
 const ObjectUtility = require('../utils/ObjectUtility.js');
 const PGClientFactory = require('../utils/PGClientFactory.js');
 
-class BaseAccessor {
+class PostgreSQLAccessor {
 
     constructor() {
         this.objectUtility = new ObjectUtility();
@@ -251,4 +251,4 @@ class BaseAccessor {
 
 }
 
-module.exports = BaseAccessor;
+module.exports = PostgreSQLAccessor;

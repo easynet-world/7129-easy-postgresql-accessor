@@ -1,4 +1,4 @@
-const BaseAccessor = require('../../src/data/BaseAccessor');
+const PostgreSQLAccessor = require('../../src/data/PostgreSQLAccessor');
 const PGClientFactory = require('../../src/utils/PGClientFactory');
 const ObjectUtility = require('../../src/utils/ObjectUtility');
 
@@ -6,7 +6,7 @@ const ObjectUtility = require('../../src/utils/ObjectUtility');
 jest.mock('../../src/utils/PGClientFactory');
 jest.mock('../../src/utils/ObjectUtility');
 
-describe('BaseAccessor', () => {
+describe('PostgreSQLAccessor', () => {
     let baseAccessor;
     let mockClient;
     let mockObjectUtility;
@@ -32,7 +32,7 @@ describe('BaseAccessor', () => {
         ObjectUtility.mockImplementation(() => mockObjectUtility);
         
         // Create instance
-        baseAccessor = new BaseAccessor();
+        baseAccessor = new PostgreSQLAccessor();
     });
 
     afterEach(() => {
