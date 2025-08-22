@@ -1,4 +1,4 @@
-const {Client} = require('pg'); // eslint-disable-line no-unused-vars
+// PostgreSQL client is managed by PGClientFactory
 const ObjectUtility = require('../utils/ObjectUtility.js');
 const PGClientFactory = require('../utils/PGClientFactory.js');
 
@@ -35,7 +35,7 @@ class PostgreSQLAccessor {
             const tableColumns = res.rows.map(row => row.column_name);
             this.columnsMap.set(tableName, tableColumns);
         } catch (e) {
-            console.log('Error retrieving column names:', e);
+            console.error('Error retrieving column names:', e);
             throw e;
         }
     }
@@ -59,7 +59,7 @@ class PostgreSQLAccessor {
             const uniqueTableColumns = res.rows.map(row => row.column_name);
             this.uniqueColumnsMap.set(tableName, uniqueTableColumns);
         } catch (e) {
-            console.log('Error retrieving unique column names:', e);
+            console.error('Error retrieving unique column names:', e);
             throw e;
         }
     }
@@ -83,7 +83,7 @@ class PostgreSQLAccessor {
             const primaryKeyColumns = res.rows.map(row => row.column_name);
             this.primaryKeyColumnsMap.set(tableName, primaryKeyColumns);
         } catch (e) {
-            console.log('Error retrieving primary key column names:', e);
+            console.error('Error retrieving primary key column names:', e);
             throw e;
         }
     }
@@ -135,6 +135,31 @@ class PostgreSQLAccessor {
         return { whereClause, params };
     }
 
+    async create(tableName, data) {
+        if (!this.client) {
+            await this.initialize();
+        }
+
+        const filteredData = this.filterWithTableColumnName(data, tableName);
+        const keys = Object.keys(filteredData);
+        const values = Object.values(filteredData);
+
+        if (keys.length === 0) {
+            throw new Error('No valid columns found for create operation');
+        }
+
+        const query = `
+            INSERT INTO ${tableName} (${keys.join(', ')})
+            VALUES (${values.map((_, i) => `$${i + 1}`).join(', ')})
+            RETURNING *`;
+
+        console.debug(query);
+        console.debug(values);
+
+        const result = await this.client.query(query, values);
+        return result.rows[0]; // Return single object for create
+    }
+
     async upsert(tableName, data, conditions) {
         if (!this.client) {
             await this.initialize();
@@ -171,7 +196,7 @@ class PostgreSQLAccessor {
         console.debug(allParams);
 
         const result = await this.client.query(query, allParams);
-        return result.rows;
+        return result.rows[0]; // Return single object for upsert
     }
 
     async update(tableName, data, conditions) {

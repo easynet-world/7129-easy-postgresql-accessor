@@ -255,11 +255,11 @@ describe('PostgreSQLAccessor', () => {
             mockObjectUtility.convertObjectToFlat.mockReturnValue({ id: 1, name: 'John', email: 'john@example.com' });
         });
 
-        test('should execute upsert query', async () => {
+                test('should execute upsert query', async () => {
             const data = { id: 1, name: 'John', email: 'john@example.com' };
             const conditions = { id: 1 };
             const mockRows = [{ id: 1, name: 'John', email: 'john@example.com' }];
-            
+
             mockClient.query.mockResolvedValue({ rows: mockRows });
 
             const result = await baseAccessor.upsert('users', data, conditions);
@@ -268,7 +268,7 @@ describe('PostgreSQLAccessor', () => {
                 expect.stringContaining('INSERT INTO users'),
                 expect.arrayContaining([1, 'John', 'john@example.com'])
             );
-            expect(result).toEqual(mockRows);
+            expect(result).toEqual(mockRows[0]); // Now returns single object
         });
 
         test('should throw error if no valid columns found', async () => {
