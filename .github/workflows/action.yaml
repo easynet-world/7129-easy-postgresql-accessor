@@ -145,6 +145,8 @@ jobs:
         npm publish
         
         echo "::notice::Successfully published version $NEW_VERSION to npm"
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     
     - name: Create Git tag
       run: |
