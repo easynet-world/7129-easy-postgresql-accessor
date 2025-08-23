@@ -1,5 +1,5 @@
 {
-  "name": "postgresql-data-accessor",
+  "name": "easy-postgresql-accessor",
   "version": "0.3.1",
   "description": "A powerful PostgreSQL data access layer with automatic schema discovery, CRUD operations, and SQL injection protection",
   "main": "dist/index.js",
@@ -47,10 +47,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/easynet-world/7129-postgresql-data-accessor.git"
+    "url": "git+https://github.com/easynet-world/7129-easy-postgresql-accessor.git"
   },
   "bugs": {
-    "url": "https://github.com/easynet-world/7129-postgresql-data-accessor/issues"
+    "url": "https://github.com/easynet-world/7129-easy-postgresql-accessor/issues"
   },
-  "homepage": "https://github.com/easynet-world/7129-postgresql-data-accessor#readme"
+  "homepage": "https://github.com/easynet-world/7129-easy-postgresql-accessor#readme"
 }
