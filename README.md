@@ -4,153 +4,135 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**PostgreSQL data access that automatically knows your table structure and performs smart operations.**
+> **PostgreSQL data access that automatically knows your table structure and performs smart operations.**
 
-## 🚀 **Key Features**
+## ✨ **What This Does**
 
-- **🔍 Auto Table Discovery** - Automatically learns table columns, constraints, and relationships
-- **🧠 Smart Operations** - Intelligent upsert, CRUD, and batch operations
-- **🛡️ SQL Injection Protection** - Built-in parameterized queries
-- **⚡ Zero Configuration** - Works out of the box with PostgreSQL
+**Automatically discover your PostgreSQL tables and perform intelligent CRUD operations without writing SQL or defining schemas.**
+
+## 🚀 **Key Benefits**
+
+| Feature | What You Get |
+|---------|--------------|
+| 🔍 **Auto Discovery** | Automatically learns table columns, constraints, and relationships |
+| 🧠 **Smart Operations** | Intelligent upsert, CRUD, and batch operations |
+| 🛡️ **SQL Injection Protection** | Built-in parameterized queries |
+| ⚡ **Zero Configuration** | Works out of the box with PostgreSQL |
 
 ## 📦 **Installation**
 
 ```bash
-# Install the package (includes dotenv for .env file support)
 npm install postgresql-data-accessor
 ```
 
-## 🚀 **Quick Start**
+## ⚡ **Quick Start (3 Steps)**
 
-### 1. **Environment Configuration**
-
-The PostgreSQL Data Accessor automatically loads environment variables from a `.env` file or system environment variables. Here's how to set it up:
-
-#### **Option A: Using .env file (Recommended)**
-
-1. **Copy the example environment file:**
-   ```bash
-   cp env.example .env
-   ```
-
-2. **Edit your `.env` file with your database credentials:**
-   ```env
-   # Database Connection
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_NAME=your_database
-   DB_USER=your_username
-   DB_PASSWORD=your_password
-   DB_SCHEMA=public
-   
-   # Connection Pool Settings
-   DB_MAX_CONNECTIONS=20
-   DB_IDLE_TIMEOUT=30000
-   DB_CONNECTION_TIMEOUT=2000
-   ```
-
-3. **The accessor automatically loads these variables** - no additional code needed!
-
-
-
-#### **Environment Validation**
-
-You can check if your environment is properly configured:
-
-```javascript
-const PGClientFactory = require('postgresql-data-accessor').PGClientFactory;
-
-// Check environment configuration
-const config = PGClientFactory.checkEnvironmentConfig();
-console.log('Environment valid:', config.isValid);
-console.log('Missing variables:', config.missing);
+### **Step 1: Setup Environment**
+```bash
+# Copy and edit environment file
+cp env.example .env
 ```
 
-### 2. **Basic Usage**
+**Edit `.env` with your database:**
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=your_database
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_SCHEMA=public
+```
 
-### 2. **Auto-Discover Table Structure**
+### **Step 2: Discover Tables**
 ```javascript
 const PostgreSQLAccessor = require('postgresql-data-accessor');
 
 const accessor = new PostgreSQLAccessor();
 
-// 🔍 Automatically learns table definition
+// 🔍 Automatically learns table structure
 await accessor.addTable('users');
 await accessor.addTable('orders');
-
-// The accessor now KNOWS:
-// - All column names and types
-// - Primary keys and unique constraints
-// - Foreign key relationships
-// - Default values and constraints
 ```
 
-### 3. **Smart Table Operations**
+### **Step 3: Use Smart Operations**
 ```javascript
-// 🧠 Smart upsert - automatically handles insert/update
+// 🧠 Smart upsert - automatically INSERT or UPDATE
 const user = await accessor.upsert('users', {
-  email: 'john@example.com',        // Unique constraint
+  email: 'john@example.com',
   firstName: 'John',
-  lastName: 'Doe',
-  lastLoginAt: new Date()
+  lastName: 'Doe'
 }, { email: 'john@example.com' });
 
-// Automatically:
-// ✅ INSERT if email doesn't exist
-// ✅ UPDATE if email exists
-// ✅ Detects unique constraints from schema
+// ✅ Automatically detects if user exists
+// ✅ Chooses INSERT or UPDATE accordingly
 ```
 
-### 4. **Full CRUD with Schema Awareness**
+## 🎯 **Core Methods**
+
+| Method | Purpose | Example |
+|--------|---------|---------|
+| `addTable(tableName)` | Discover table schema | `await accessor.addTable('users')` |
+| `upsert(table, data, conditions)` | Smart insert/update | `await accessor.upsert('users', userData, {email})` |
+| `create(table, data)` | Create new records | `await accessor.create('users', userData)` |
+| `read(table, conditions)` | Query records | `await accessor.read('users', {isActive: true})` |
+| `update(table, data, conditions)` | Update records | `await accessor.update('users', {isActive: false}, {email})` |
+| `delete(table, conditions)` | Delete records | `await accessor.delete('users', {email})` |
+
+## 🔍 **How It Works**
+
+### **1. Schema Discovery**
 ```javascript
-// Create - knows all valid columns
-const newUser = await accessor.create('users', {
-  email: 'jane@example.com',
-  firstName: 'Jane',
-  lastName: 'Smith'
-});
-
-// Read - with smart filtering
-const users = await accessor.read('users', { isActive: true });
-
-// Update - only updates valid columns
-await accessor.update('users', 
-  { isActive: false }, 
-  { email: 'john@example.com' }
-);
-
-// Delete - with conditions
-await accessor.delete('users', { email: 'john@example.com' });
+await accessor.addTable('users');
+// ✅ Discovers all columns and types
+// ✅ Finds primary keys and unique constraints  
+// ✅ Maps foreign key relationships
+// ✅ Respects default values and constraints
 ```
 
-## 🔍 **How Auto Schema Discovery Works**
+### **2. Smart Operations**
+```javascript
+// The accessor KNOWS your schema, so it:
+// - Only allows valid column names
+// - Respects unique constraints for upserts
+// - Uses primary keys for efficient lookups
+// - Prevents SQL injection automatically
+```
 
-**The accessor automatically scans your PostgreSQL tables and discovers everything:**
+### **3. Zero Manual Work**
+- ❌ No SQL writing required
+- ❌ No schema definitions needed
+- ❌ No manual column mapping
+- ✅ Just use your table names
 
-- **Column names and types** - No manual mapping needed
-- **Primary key constraints** - For efficient lookups
-- **Unique constraints** - Powers smart upsert operations
-- **Foreign key relationships** - Understands table connections
-- **Default values and constraints** - Respects your schema
+## 📋 **Complete Example**
 
-**Zero manual schema definition required!**
+```javascript
+const PostgreSQLAccessor = require('postgresql-data-accessor');
 
-## 🧠 **Smart Table Operations**
-
-1. **Learns your schema** automatically on first use
-2. **Intelligently handles** INSERT vs UPDATE decisions
-3. **Respects constraints** and validates data
-4. **Optimizes queries** based on discovered indexes
-5. **Prevents errors** by knowing valid columns
-
-## 📚 **Core Methods**
-
-- `addTable(tableName)` - **Auto-discover table schema**
-- `upsert(table, data, conditions)` - **Smart insert/update**
-- `create(table, data)` - **Schema-aware insert**
-- `read(table, conditions)` - **Smart querying**
-- `update(table, data, conditions)` - **Safe updates**
-- `delete(table, conditions)` - **Conditional deletes**
+async function example() {
+  const accessor = new PostgreSQLAccessor();
+  
+  // Discover tables
+  await accessor.addTable('users');
+  await accessor.addTable('orders');
+  
+  // Create user
+  const user = await accessor.create('users', {
+    email: 'jane@example.com',
+    firstName: 'Jane',
+    lastName: 'Smith'
+  });
+  
+  // Smart upsert
+  const updatedUser = await accessor.upsert('users', {
+    email: 'jane@example.com',
+    lastLoginAt: new Date()
+  }, { email: 'jane@example.com' });
+  
+  // Query users
+  const activeUsers = await accessor.read('users', { isActive: true });
+}
+```
 
 ## 🧪 **Testing**
 
