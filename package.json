@@ -26,8 +26,10 @@
   "author": "boqiang.liang <lbq999@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "dotenv": "^16.3.1",
     "pg": "^8.11.3"
+  },
+  "peerDependencies": {
+    "dotenv": ">=16.0.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

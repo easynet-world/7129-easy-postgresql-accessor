@@ -4,26 +4,30 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
-**Zero-config PostgreSQL data access with automatic schema discovery and intelligent upsert operations.**
+**PostgreSQL data access that automatically knows your table structure and performs smart operations.**
 
-## 🚀 Key Features
+## 🚀 **Key Features**
 
-- **🔍 Auto Schema Scanning** - Automatically discovers table structure, primary keys, unique constraints
-- **🔄 Smart Upsert** - Automatically handles insert/update based on unique constraints
+- **🔍 Auto Table Discovery** - Automatically learns table columns, constraints, and relationships
+- **🧠 Smart Operations** - Intelligent upsert, CRUD, and batch operations
 - **🛡️ SQL Injection Protection** - Built-in parameterized queries
-- **⚡ High Performance** - Efficient connection pooling and query optimization
-- **🎯 Zero Configuration** - Works out of the box with standard PostgreSQL
+- **⚡ Zero Configuration** - Works out of the box with PostgreSQL
 
-## 📦 Installation
+## 📦 **Installation**
 
 ```bash
-npm install postgresql-data-accessor dotenv
+# Install the main package
+npm install postgresql-data-accessor
+
+# Optional: Install dotenv for .env file support
+npm install dotenv
 ```
 
-## 🚀 Quick Start
+## 🚀 **Quick Start**
 
-### 1. Setup Environment
+### 1. **Environment Setup**
 
+**Option A: Using .env file (recommended)**
 ```env
 DB_HOST=localhost
 DB_PORT=5432
@@ -32,28 +36,36 @@ DB_USER=your_username
 DB_PASSWORD=your_password
 ```
 
-### 2. Initialize & Auto-Discover Schema
+**Option B: Direct environment variables**
+```bash
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=your_database
+export DB_USER=your_username
+export DB_PASSWORD=your_password
+```
 
+### 2. **Auto-Discover Table Structure**
 ```javascript
 require('dotenv').config();
 const PostgreSQLAccessor = require('postgresql-data-accessor');
 
 const accessor = new PostgreSQLAccessor();
 
-// 🔍 Automatically scan table structure
+// 🔍 Automatically learns table definition
 await accessor.addTable('users');
 await accessor.addTable('orders');
 
-// Now the accessor knows:
-// - All columns and types
-// - Primary keys and unique constraints  
+// The accessor now KNOWS:
+// - All column names and types
+// - Primary keys and unique constraints
 // - Foreign key relationships
+// - Default values and constraints
 ```
 
-### 3. Automatic Upsert Operations
-
+### 3. **Smart Table Operations**
 ```javascript
-// 🔄 Smart upsert - automatically handles insert or update
+// 🧠 Smart upsert - automatically handles insert/update
 const user = await accessor.upsert('users', {
   email: 'john@example.com',        // Unique constraint
   firstName: 'John',
@@ -61,75 +73,73 @@ const user = await accessor.upsert('users', {
   lastLoginAt: new Date()
 }, { email: 'john@example.com' });
 
-// This will:
+// Automatically:
 // ✅ INSERT if email doesn't exist
 // ✅ UPDATE if email exists
-// ✅ Automatically detect unique constraints from schema
+// ✅ Detects unique constraints from schema
 ```
 
-### 4. Full CRUD Operations
-
+### 4. **Full CRUD with Schema Awareness**
 ```javascript
-// Create
+// Create - knows all valid columns
 const newUser = await accessor.create('users', {
   email: 'jane@example.com',
   firstName: 'Jane',
   lastName: 'Smith'
 });
 
-// Read
+// Read - with smart filtering
 const users = await accessor.read('users', { isActive: true });
 
-// Update
+// Update - only updates valid columns
 await accessor.update('users', 
   { isActive: false }, 
   { email: 'john@example.com' }
 );
 
-// Delete
+// Delete - with conditions
 await accessor.delete('users', { email: 'john@example.com' });
 ```
 
-## 🔍 How Auto Schema Discovery Works
+## 🔍 **How Auto Schema Discovery Works**
 
-The accessor automatically scans your PostgreSQL tables and discovers:
+**The accessor automatically scans your PostgreSQL tables and discovers everything:**
 
-- **Column names and types**
-- **Primary key constraints**
-- **Unique constraints** (used for upsert operations)
-- **Foreign key relationships**
-- **Default values and constraints**
+- **Column names and types** - No manual mapping needed
+- **Primary key constraints** - For efficient lookups
+- **Unique constraints** - Powers smart upsert operations
+- **Foreign key relationships** - Understands table connections
+- **Default values and constraints** - Respects your schema
 
-No manual schema definition needed!
+**Zero manual schema definition required!**
 
-## 🔄 How Smart Upsert Works
+## 🧠 **Smart Table Operations**
 
-1. **Scans table schema** to find unique constraints
-2. **Automatically determines** whether to INSERT or UPDATE
-3. **Handles conflicts** gracefully using PostgreSQL's `ON CONFLICT`
-4. **Zero configuration** - just specify your data and conditions
+1. **Learns your schema** automatically on first use
+2. **Intelligently handles** INSERT vs UPDATE decisions
+3. **Respects constraints** and validates data
+4. **Optimizes queries** based on discovered indexes
+5. **Prevents errors** by knowing valid columns
 
-## 📚 API Reference
+## 📚 **Core Methods**
 
-### Core Methods
+- `addTable(tableName)` - **Auto-discover table schema**
+- `upsert(table, data, conditions)` - **Smart insert/update**
+- `create(table, data)` - **Schema-aware insert**
+- `read(table, conditions)` - **Smart querying**
+- `update(table, data, conditions)` - **Safe updates**
+- `delete(table, conditions)` - **Conditional deletes**
 
-- `addTable(tableName)` - Auto-discover table schema
-- `upsert(table, data, conditions)` - Smart insert/update
-- `create(table, data)` - Insert new record
-- `read(table, conditions, options)` - Query with filtering
-- `update(table, data, conditions)` - Update records
-- `delete(table, conditions)` - Delete records
-
-## 🧪 Testing
+## 🧪 **Testing**
 
 ```bash
 npm test
 ```
 
-## 📄 License
+## 📄 **License**
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Made with ❤️ for the Node.js community**
+**PostgreSQL data access that thinks for itself** 🧠✨

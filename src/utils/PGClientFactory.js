@@ -1,4 +1,9 @@
-require('dotenv').config();
+// Try to load dotenv if available, but don't fail if it's not
+try {
+  require('dotenv').config();
+} catch (error) {
+  // dotenv not available, continue without it
+}
 
 const {Client} = require('pg');
 
