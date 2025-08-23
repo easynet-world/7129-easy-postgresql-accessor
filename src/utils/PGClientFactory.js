@@ -1,8 +1,9 @@
-// Try to load dotenv if available, but don't fail if it's not
+// Load environment variables from .env file
 try {
   require('dotenv').config();
+  console.log('Environment variables loaded from .env file');
 } catch (error) {
-  // dotenv not available, continue without it
+  console.warn('Warning: dotenv not available, environment variables may not be loaded:', error.message);
 }
 
 const {Client} = require('pg');
@@ -21,6 +22,14 @@ class PGClientFactory {
   }
 
   static async getPGClient() {
+    // Validate required environment variables
+    const requiredEnvVars = ['DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DB_SCHEMA'];
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}. Please check your .env file.`);
+    }
+
     if (!PGClientFactory.client) {
       PGClientFactory.client = new Client({
         user: process.env.DB_USER,
@@ -48,6 +57,23 @@ class PGClientFactory {
       await PGClientFactory.client.end();
       PGClientFactory.client = null;
     }
+  }
+
+  /**
+   * Check if all required environment variables are set
+   * @returns {Object} Object with validation results
+   */
+  static checkEnvironmentConfig() {
+    const requiredEnvVars = ['DB_USER', 'DB_NAME', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DB_SCHEMA'];
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    const presentVars = requiredEnvVars.filter(varName => process.env[varName]);
+    
+    return {
+      isValid: missingVars.length === 0,
+      missing: missingVars,
+      present: presentVars,
+      total: requiredEnvVars.length
+    };
   }
 
 }

@@ -16,38 +16,76 @@
 ## 📦 **Installation**
 
 ```bash
-# Install the main package
+# Install the package (includes dotenv for .env file support)
 npm install postgresql-data-accessor
-
-# Optional: Install dotenv for .env file support
-npm install dotenv
 ```
 
 ## 🚀 **Quick Start**
 
-### 1. **Environment Setup**
+### 1. **Environment Configuration**
 
-**Option A: Using .env file (recommended)**
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=your_database
-DB_USER=your_username
-DB_PASSWORD=your_password
-```
+The PostgreSQL Data Accessor automatically loads environment variables from a `.env` file or system environment variables. Here's how to set it up:
 
-**Option B: Direct environment variables**
+#### **Option A: Using .env file (Recommended)**
+
+1. **Copy the example environment file:**
+   ```bash
+   cp env.example .env
+   ```
+
+2. **Edit your `.env` file with your database credentials:**
+   ```env
+   # Database Connection
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=your_database
+   DB_USER=your_username
+   DB_PASSWORD=your_password
+   DB_SCHEMA=public
+   
+   # Connection Pool Settings
+   DB_MAX_CONNECTIONS=20
+   DB_IDLE_TIMEOUT=30000
+   DB_CONNECTION_TIMEOUT=2000
+   
+   # Test Database (Optional)
+   TEST_DB_USER=testuser
+   TEST_DB_PASSWORD=testpass
+   TEST_DB_HOST=localhost
+   TEST_DB_PORT=5432
+   TEST_DB_NAME=testdb
+   TEST_DB_SCHEMA=public
+   ```
+
+3. **The accessor automatically loads these variables** - no additional code needed!
+
+#### **Option B: System Environment Variables**
 ```bash
 export DB_HOST=localhost
 export DB_PORT=5432
 export DB_NAME=your_database
 export DB_USER=your_username
 export DB_PASSWORD=your_password
+export DB_SCHEMA=public
 ```
+
+#### **Environment Validation**
+
+You can check if your environment is properly configured:
+
+```javascript
+const PGClientFactory = require('postgresql-data-accessor').PGClientFactory;
+
+// Check environment configuration
+const config = PGClientFactory.checkEnvironmentConfig();
+console.log('Environment valid:', config.isValid);
+console.log('Missing variables:', config.missing);
+```
+
+### 2. **Basic Usage**
 
 ### 2. **Auto-Discover Table Structure**
 ```javascript
-require('dotenv').config();
 const PostgreSQLAccessor = require('postgresql-data-accessor');
 
 const accessor = new PostgreSQLAccessor();
