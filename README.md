@@ -47,27 +47,11 @@ The PostgreSQL Data Accessor automatically loads environment variables from a `.
    DB_MAX_CONNECTIONS=20
    DB_IDLE_TIMEOUT=30000
    DB_CONNECTION_TIMEOUT=2000
-   
-   # Test Database (Optional)
-   TEST_DB_USER=testuser
-   TEST_DB_PASSWORD=testpass
-   TEST_DB_HOST=localhost
-   TEST_DB_PORT=5432
-   TEST_DB_NAME=testdb
-   TEST_DB_SCHEMA=public
    ```
 
 3. **The accessor automatically loads these variables** - no additional code needed!
 
-#### **Option B: System Environment Variables**
-```bash
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_NAME=your_database
-export DB_USER=your_username
-export DB_PASSWORD=your_password
-export DB_SCHEMA=public
-```
+
 
 #### **Environment Validation**
 
