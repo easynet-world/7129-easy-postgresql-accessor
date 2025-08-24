@@ -45,7 +45,10 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
           echo "NPM config created"
           cat ~/.npmrc | sed 's/:_authToken=.*/:_authToken=***/'
-          npm whoami
+          echo "Current npm config:"
+          npm config list
+          echo "Testing npm authentication..."
+          npm whoami --verbose
 
       - name: Release
         env:
