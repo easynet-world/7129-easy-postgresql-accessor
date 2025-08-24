@@ -1,58 +1,30 @@
-name: Release
+name: Release (semantic-release)
 
 on:
   push:
-    branches:
-      - master
-  workflow_dispatch:
+    branches: [master]
 
 jobs:
   release:
-    name: Release
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
+          persist-credentials: true
           fetch-depth: 0
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Run tests
         run: npm test
 
-      - name: Configure npm authentication
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "NPM_TOKEN length: ${#NPM_TOKEN}"
-          if [ -z "$NPM_TOKEN" ]; then
-            echo "ERROR: NPM_TOKEN is not set"
-            exit 1
-          fi
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-          echo "NPM config created"
-          cat ~/.npmrc | sed 's/:_authToken=.*/:_authToken=***/'
-          echo "Current npm config:"
-          npm config list
-          echo "Testing npm authentication..."
-          npm whoami --verbose
+      - name: Run linting
+        run: npm run lint
 
-      - name: Release
+      - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_ENV: production
         run: npx semantic-release
