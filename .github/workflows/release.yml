@@ -35,7 +35,14 @@ jobs:
 
       - name: Configure npm authentication
         run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "NPM_TOKEN length: ${#NPM_TOKEN}"
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "ERROR: NPM_TOKEN is not set"
+            exit 1
+          fi
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+          echo "NPM config created"
+          cat ~/.npmrc | sed 's/:_authToken=.*/:_authToken=***/'
           npm whoami
 
       - name: Release
