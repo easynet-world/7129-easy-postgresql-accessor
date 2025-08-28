@@ -1,6 +1,6 @@
-# PostgreSQL Data Accessor
+# Easy PostgreSQL Accessor
 
-[![npm version](https://badge.fury.io/js/postgresql-data-accessor.svg)](https://badge.fury.io/js/postgresql-data-accessor)
+[![npm version](https://badge.fury.io/js/easy-postgresql-accessor.svg)](https://badge.fury.io/js/easy-postgresql-accessor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)](https://nodejs.org/)
 
@@ -22,7 +22,7 @@
 ## 📦 **Installation**
 
 ```bash
-npm install postgresql-data-accessor
+npm install easy-postgresql-accessor
 ```
 
 ## ⚡ **Quick Start (3 Steps)**
@@ -45,7 +45,7 @@ DB_SCHEMA=public
 
 ### **Step 2: Discover Tables**
 ```javascript
-const PostgreSQLAccessor = require('postgresql-data-accessor');
+const PostgreSQLAccessor = require('easy-postgresql-accessor');
 
 const accessor = new PostgreSQLAccessor();
 
@@ -107,7 +107,7 @@ await accessor.addTable('users');
 ## 📋 **Complete Example**
 
 ```javascript
-const PostgreSQLAccessor = require('postgresql-data-accessor');
+const PostgreSQLAccessor = require('easy-postgresql-accessor');
 
 async function example() {
   const accessor = new PostgreSQLAccessor();
